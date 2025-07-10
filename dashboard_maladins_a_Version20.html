@@ -424,6 +424,9 @@
         await carregarHistorico(user.email);
         await carregarInvestimentos(user.email);
 
+        // Verificar se deve exibir o botão "Visão do Professor" para emails @timejopa.com.br
+        verificarExibicaoBotaoVisaoProfessor();
+
         fecharExtrato();
         fecharInvestimentos();
         fecharTopInvestidores();
@@ -952,6 +955,24 @@
     window.transferirConfirmado = transferirConfirmado;
     window.fecharConfirmacaoTransferencia = fecharConfirmacaoTransferencia;
 
+    // NAVEGAÇÃO ENTRE VISÕES - Função para verificar se deve exibir botão "Visão do Professor"
+    function verificarExibicaoBotaoVisaoProfessor() {
+      const btnVisaoProfessor = document.getElementById("btnVisaoProfessor");
+      if (userEmail && userEmail.endsWith("@timejopa.com.br")) {
+        btnVisaoProfessor.style.display = "inline-block";
+      } else {
+        btnVisaoProfessor.style.display = "none";
+      }
+    }
+
+    // Função para navegar para a visão do professor
+    function irParaVisaoProfessor() {
+      window.location.href = "dashboard_professor_v3.html";
+    }
+
+    window.verificarExibicaoBotaoVisaoProfessor = verificarExibicaoBotaoVisaoProfessor;
+    window.irParaVisaoProfessor = irParaVisaoProfessor;
+
     // Links do menu, modais e eventos
     window.loginComGoogle = loginComGoogle;
     window.aplicar = aplicar;
@@ -1004,6 +1025,8 @@
       <a href="jogos.html">Jogos</a>
       <button onclick="abrirTopInvestidores()" type="button">Top Investidores</button>
       <button onclick="abrirSobre()" type="button">Sobre</button>
+      <!-- Botão para alternar para visão do professor - só aparece para emails @timejopa.com.br -->
+      <button id="btnVisaoProfessor" onclick="irParaVisaoProfessor()" type="button" style="display: none;">Visão do Professor</button>
     </nav>
   </header>
   <div id="loginArea" style="max-width:450px; margin:60px auto;">
