@@ -120,6 +120,9 @@
         document.getElementById("profEmail").textContent = user.email;
         document.getElementById("profSaldo").textContent = updatedSnap.data().balance;
 
+        // Mostrar link "Visão do Aluno" para professores autenticados (@timejopa.com.br)
+        document.getElementById("linkVisaoAluno").style.display = "inline";
+
       } catch (error) {
         alert("Erro ao autenticar: " + error.message);
         console.error(error);
@@ -176,6 +179,8 @@
       <a href="index.html">🏠 Home</a>
       <a href="#">🎮 Jogos</a>
       <a href="#">📘 Sobre</a>
+      <!-- Botão para alternar para visão do aluno - apenas para emails @timejopa.com.br -->
+      <a href="dashboard_maladins_a_Version20.html" id="linkVisaoAluno" style="display: none;">👨‍🎓 Visão do Aluno</a>
     </nav>
   </header>
 
