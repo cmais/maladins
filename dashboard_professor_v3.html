@@ -120,6 +120,9 @@
         document.getElementById("profEmail").textContent = user.email;
         document.getElementById("profSaldo").textContent = updatedSnap.data().balance;
 
+        // Verificar se deve exibir o botão "Visão do Aluno" para emails @timejopa.com.br
+        verificarExibicaoBotaoVisaoAluno();
+
       } catch (error) {
         alert("Erro ao autenticar: " + error.message);
         console.error(error);
@@ -165,8 +168,26 @@
       alert(`Transferência de ${quantia} maladins para ${alunoEmail} realizada com sucesso.`);
     }
 
+    // NAVEGAÇÃO ENTRE VISÕES - Função para verificar se deve exibir botão "Visão do Aluno"
+    function verificarExibicaoBotaoVisaoAluno() {
+      const btnVisaoAluno = document.getElementById("btnVisaoAluno");
+      const authUser = auth.currentUser;
+      if (authUser && authUser.email && authUser.email.endsWith("@timejopa.com.br")) {
+        btnVisaoAluno.style.display = "inline-block";
+      } else {
+        btnVisaoAluno.style.display = "none";
+      }
+    }
+
+    // Função para navegar para a visão do aluno
+    function irParaVisaoAluno() {
+      window.location.href = "dashboard_maladins_a_Version20.html";
+    }
+
     window.loginProfessor = loginProfessor;
     window.transferirMaladins = transferirMaladins;
+    window.verificarExibicaoBotaoVisaoAluno = verificarExibicaoBotaoVisaoAluno;
+    window.irParaVisaoAluno = irParaVisaoAluno;
   </script>
 </head>
 <body>
@@ -176,6 +197,8 @@
       <a href="index.html">🏠 Home</a>
       <a href="#">🎮 Jogos</a>
       <a href="#">📘 Sobre</a>
+      <!-- Botão para alternar para visão do aluno - só aparece para emails @timejopa.com.br -->
+      <a id="btnVisaoAluno" href="#" onclick="irParaVisaoAluno()" style="display: none;">👨‍🎓 Visão do Aluno</a>
     </nav>
   </header>
 
