@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Maladins</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #005b96;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 0 0 14px 14px;
+      box-shadow: 0 2px 10px rgba(0,91,150,0.08);
+    }
+    .dashboard-header .logo {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dashboard-header .logo .emoji {
+      font-size: 24px;
+      margin-left: 6px;
+    }
+    .dashboard-header nav a, .dashboard-header nav button {
+      color: #fff;
+      background: none;
+      border: none;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: bold;
+      transition: color 0.15s;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+    }
+    .dashboard-header nav a:hover, .dashboard-header nav button:hover {
+      color: #ffc107;
+    }
+    .dashboard-header nav {
+      display: flex;
+      align-items: center;
+    }
+    .dashboard-header nav button {
+      font-family: inherit;
+    }
+    .dashboard-container {
+      display: flex;
+      gap: 32px;
+      margin: 32px auto 0 auto;
+      max-width: 950px;
+      padding: 0 8px;
+      min-height: 90vh;
+    }
+    .coluna-esquerda, .coluna-direita {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 13px;
+      box-shadow: 0 1.5px 9px rgba(0,91,150,0.06);
+      padding: 20px 16px;
+      position: relative;
+    }
+    .boas-vindas { font-size: 20px; font-weight: bold; }
+    .user-info { font-size: 15px; margin-bottom: 10px; }
+    .saldo { font-weight: bold; font-size: 17px; color: #005b96; }
+    label { font-weight: bold; }
+    input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 7px;
+      font-size: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: #005b96;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.18s;
+      font-weight: bold;
+      margin-top: 6px;
+      width: 100%;
+    }
+    button:hover { background: #004472; }
+    .painel-investimento { margin-bottom: 24px; }
+    .painel-investimento input[type="number"] { width: 120px; }
+    .help {
+      color: #005b96;
+      cursor: pointer;
+      font-weight: bold;
+      margin-left: 5px;
+      position: relative;
+      display: inline-block;
+    }
+    .help .tooltip {
+      display: none;
+      position: absolute;
+      background: #fff;
+      color: #333;
+      font-size: 12px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      width: 210px;
+      z-index: 10;
+      top: 20px;
+      left: 0;
+    }
+    .help:hover .tooltip,
+    .help:focus .tooltip {
+      display: block;
+    }
+    #modalInvestimentos, #modalTopInvestidores, #modalTotalPoupanca, #modalTotalFixa, #modalTotalAllInvestimentos, #modalSobre, #modalConfirmacaoTransferencia, #modalInvestimentoSucesso {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.2);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #modalInvestimentos.active, #modalTopInvestidores.active, #modalTotalPoupanca.active, #modalTotalFixa.active, #modalTotalAllInvestimentos.active, #modalSobre.active, #modalConfirmacaoTransferencia.active, #modalInvestimentoSucesso.active {
+      display: flex;
+    }
+    #modalInvestimentosContent, #modalTopInvestidoresContent, #modalTotalPoupancaContent, #modalTotalFixaContent, #modalTotalAllInvestimentosContent, #modalSobreContent, #modalConfirmacaoTransferenciaContent, #modalInvestimentoSucessoContent {
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.13);
+      min-width: 270px;
+      max-width: 95vw;
+      max-height: 95vh;
+      overflow-y: auto;
+      text-align: center;
+      position: relative;
+    }
+    #listaInvestimentos, #listaTopInvestidores, #listaTotalPoupanca, #listaTotalFixa {
+      max-height: 320px;
+      overflow-y: auto;
+      margin: 11px 0 20px 0;
+    }
+    #listaInvestimentos > div, #listaTopInvestidores > div, #listaTotalPoupanca > div, #listaTotalFixa > div {
+      padding: 5px 0;
+      margin: 7px 0;
+      border-bottom: 1px solid #eee;
+    }
+    #modalExtrato {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.2);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #modalExtrato.active {
+      display: flex;
+    }
+    #modalExtratoContent {
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.13);
+      min-width: 270px;
+      max-width: 90vw;
+    }
+    #listaExtrato {
+      max-height: 320px;
+      overflow-y: auto;
+      margin: 11px 0 20px 0;
+      list-style: none;
+      padding: 0;
+    }
+    #listaExtrato li {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+    #listaExtrato li.entrada { color: green; }
+    #listaExtrato li.saida { color: red; }
+    .extrato-btn { margin-top: 8px; }
+    .destinatario-section { position: relative; }
+    #listaSugestoes {
+      border:1px solid #aad;
+      display:none;
+      position:absolute;
+      background:#fff;
+      z-index:10;
+      max-height:200px;
+      overflow-y:auto;
+      width:100%;
+      box-shadow: 0 2px 7px rgba(0,91,150,0.07);
+      font-size:15px;
+    }
+    #listaSugestoes div {
+      padding:7px 12px;
+      cursor:pointer;
+      border-bottom:1px solid #eef;
+      transition: background 0.1s;
+    }
+    #listaSugestoes div:last-child { border-bottom:none; }
+    #listaSugestoes div:hover, #listaSugestoes div:focus {
+      background:#e7f4fa;
+    }
+    #listaSugestoes::-webkit-scrollbar { width: 6px; background: #f1f1f1; }
+    #listaSugestoes::-webkit-scrollbar-thumb { background: #cee6f7; border-radius: 3px; }
+    /* Toast de sucesso */
+    #toast {
+      display: none;
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      background: #005b96;
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      z-index: 999;
+      font-size: 18px;
+      box-shadow: 0 2px 10px rgba(0,91,150,0.2);
+      animation: fadein 0.4s, fadeout 0.4s 2.4s;
+    }
+    @keyframes fadein {
+      from { opacity: 0; right: 0;}
+      to { opacity: 1; right: 22px;}
+    }
+    @keyframes fadeout {
+      from { opacity: 1; right: 22px;}
+      to { opacity: 0; right: 0;}
+    }
+    /* Moedas animadas no modal de sucesso */
+    .moeda-animada {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      font-size: 30px;
+      opacity: 0;
+      animation: cair-moeda 1s forwards;
+      pointer-events: none;
+    }
+    .moeda-animada.m1 { left: 30%; animation-delay: 0.1s;}
+    .moeda-animada.m2 { left: 50%; animation-delay: 0.18s;}
+    .moeda-animada.m3 { left: 60%; animation-delay: 0.28s;}
+    .moeda-animada.m4 { left: 40%; animation-delay: 0.24s;}
+    .moeda-animada.m5 { left: 70%; animation-delay: 0.2s;}
+    @keyframes cair-moeda {
+      0% { top: -50px; opacity: 0;}
+      35% { opacity: 1;}
+      60% { top: 30px; opacity: 1;}
+      100% { top: 60px; opacity: 0;}
+    }
+    @media (max-width: 900px) {
+      .dashboard-container { flex-direction: column; gap: 0; }
+      .coluna-esquerda, .coluna-direita { gap: 16px; }
+      .dashboard-header { flex-direction: column; align-items: flex-start; padding: 12px 8px; }
+      .dashboard-header nav { margin-top: 8px; }
+      .dashboard-header nav a, .dashboard-header nav button { margin-left: 0; margin-right: 15px;}
+    }
+    @media (max-width: 500px) {
+      .card { padding: 12px 6px; }
+      #modalInvestimentosContent, #modalTopInvestidoresContent, #modalTotalPoupancaContent, #modalTotalFixaContent, #modalTotalAllInvestimentosContent, #modalSobreContent, #modalConfirmacaoTransferenciaContent, #modalInvestimentoSucessoContent {
+        padding: 10px 2px;
+        min-width: unset;
+      }
+      #toast { padding: 9px 12px; font-size: 15px;}
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getAuth,
+      signInWithPopup,
+      GoogleAuthProvider,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      updateDoc,
+      increment,
+      addDoc,
+      collection,
+      getDocs,
+      serverTimestamp,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaES1733ncqRt_GLMkqtSOilijEtGZhks",
+      authDomain: "maladins-494d6.firebaseapp.com",
+      projectId: "maladins-494d6",
+      storageBucket: "maladins-494d6.appspot.com",
+      messagingSenderId: "734297372043",
+      appId: "1:734297372043:web:d08186d7a45ef356f02b8e",
+      measurementId: "G-8W6RLX3948"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let userEmail = "";
+    let historicoCache = [];
+    let investimentosCache = [];
+    let listaUsuarios = [];
+
+    // Variáveis globais para confirmação de transferência
+    let transferenciaTemp = {
+      destinatario: "",
+      destinatarioNome: "",
+      valor: 0
+    };
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2800);
+    }
+
+    function showInvestimentoSucesso(tipo, valor) {
+      const modal = document.getElementById('modalInvestimentoSucesso');
+      const content = document.getElementById('modalInvestimentoSucessoContent');
+      let texto = '';
+      let emoji = '';
+      if (tipo === 'poupanca') {
+        texto = `Você aplicou <b>${valor} maladins</b> em <b>Poupança</b>!`;
+        emoji = "💰";
+      } else {
+        texto = `Você aplicou <b>${valor} maladins</b> em <b>Renda Fixa</b>!`;
+        emoji = "💵";
+      }
+      content.innerHTML = `
+        <h3>Investimento realizado!</h3>
+        <div style="font-size:20px; margin-bottom: 10px;">${texto}</div>
+        <div id="moedasAnimadas"></div>
+        <button style="margin-top:22px" onclick="fecharInvestimentoSucesso()">OK</button>
+      `;
+      // Cria as moedas animadas
+      const moedasDiv = content.querySelector('#moedasAnimadas');
+      moedasDiv.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        const moeda = document.createElement('div');
+        moeda.className = `moeda-animada m${i}`;
+        moeda.textContent = "🪙";
+        moedasDiv.appendChild(moeda);
+      }
+      modal.classList.add('active');
+      // Fecha automaticamente após 2.5s se o usuário não clicar em OK
+      setTimeout(() => { fecharInvestimentoSucesso(); }, 2500);
+    }
+    window.fecharInvestimentoSucesso = function() {
+      document.getElementById('modalInvestimentoSucesso').classList.remove('active');
+    };
+
+    async function carregarUsuarios() {
+      listaUsuarios = [];
+      const usersSnap = await getDocs(collection(db, "users"));
+      usersSnap.forEach(docSnap => {
+        const email = docSnap.id;
+        let nome = "";
+        if (docSnap.data().nome) {
+          nome = docSnap.data().nome;
+        } else {
+          nome = email.split("@")[0].replace(/\./g, " ");
+          nome = nome.split(" ").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+        }
+        listaUsuarios.push({ nome, email });
+      });
+    }
+
+    async function loginComGoogle() {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        if (!user.email.endsWith("@jopers.com.br") && !user.email.endsWith("@timejopa.com.br")) {
+          alert("Somente emails institucionais são permitidos.");
+          await signOut(auth);
+          return;
+        }
+
+        document.getElementById("loginArea").style.display = "none";
+        document.getElementById("mainPanel").style.display = "flex";
+
+        const docRef = doc(db, "users", user.email);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          await setDoc(docRef, { balance: 0 });
+        }
+
+        userEmail = user.email;
+
+        const primeiroNome = user.email.split("@")[0].split(".")[0];
+        const nomeFormatado = primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1);
+        document.getElementById("boasVindas").innerHTML = `Olá, <strong>${nomeFormatado}</strong>!`;
+        document.getElementById("userEmail").textContent = user.email;
+        document.getElementById("saldoAtual").textContent = (docSnap.exists() ? docSnap.data().balance : 0);
+
+        await carregarUsuarios();
+        await carregarHistorico(user.email);
+        await carregarInvestimentos(user.email);
+
+        fecharExtrato();
+        fecharInvestimentos();
+        fecharTopInvestidores();
+        fecharTotalPoupanca();
+        fecharTotalFixa();
+        fecharTotalAllInvestimentos();
+        fecharSobre();
+        fecharConfirmacaoTransferencia();
+        fecharInvestimentoSucesso();
+
+      } catch (error) {
+        console.error("Erro ao autenticar:", error);
+        alert("Erro ao fazer login com Google: " + error.message);
+      }
+    }
+
+    window.filtrarUsuariosDropdown = function() {
+      const input = document.getElementById("destinatario");
+      const val = input.value.toLowerCase();
+      const sugestoes = listaUsuarios.filter(u =>
+        u.nome.toLowerCase().includes(val) || u.email.toLowerCase().includes(val)
+      ).slice(0,8);
+
+      const lista = document.getElementById("listaSugestoes");
+      lista.innerHTML = "";
+      if (val && sugestoes.length > 0) {
+        sugestoes.forEach(u => {
+          const div = document.createElement("div");
+          div.textContent = `${u.nome} (${u.email})`;
+          div.tabIndex = 0;
+          div.onclick = () => {
+            input.value = u.email;
+            lista.style.display = "none";
+          };
+          div.onmouseenter = () => div.style.background = "#e7f4fa";
+          div.onmouseleave = () => div.style.background = "#fff";
+          lista.appendChild(div);
+        });
+        lista.style.display = "block";
+      } else {
+        lista.style.display = "none";
+      }
+    };
+    document.addEventListener("click", function(e){
+      if (document.getElementById("destinatario") && !document.getElementById("destinatario").contains(e.target) &&
+          !document.getElementById("listaSugestoes").contains(e.target)) {
+        document.getElementById("listaSugestoes").style.display = "none";
+      }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+      if (document.getElementById("destinatario")) {
+        document.getElementById("destinatario").addEventListener("blur", function() {
+          setTimeout(() => {
+            document.getElementById("listaSugestoes").style.display = "none";
+          }, 200);
+        });
+      }
+    });
+
+    // Nova função: Abre o modal de confirmação antes de transferir
+    function solicitarConfirmacaoTransferencia() {
+      const remetente = userEmail;
+      const destinatario = document.getElementById("destinatario").value.trim();
+      const valor = parseInt(document.getElementById("valor").value);
+
+      // Validações antes de mostrar o modal:
+      if (!listaUsuarios.some(u => u.email === destinatario)) {
+        alert("Selecione um destinatário válido da lista.");
+        return;
+      }
+      if (remetente === destinatario) {
+        alert("Não é possível transferir para si mesmo.");
+        return;
+      }
+      if (isNaN(valor) || valor <= 0) {
+        alert("Valor inválido.");
+        return;
+      }
+
+      // Buscar nome do destinatário
+      const usuarioObj = listaUsuarios.find(u => u.email === destinatario);
+      transferenciaTemp.destinatario = destinatario;
+      transferenciaTemp.destinatarioNome = usuarioObj ? usuarioObj.nome : destinatario;
+      transferenciaTemp.valor = valor;
+
+      // Exibir no modal
+      document.getElementById("confirmaDestinatario").textContent = transferenciaTemp.destinatarioNome + " (" + transferenciaTemp.destinatario + ")";
+      document.getElementById("confirmaValor").textContent = transferenciaTemp.valor;
+
+      document.getElementById("modalConfirmacaoTransferencia").classList.add("active");
+    }
+
+    // Função chamada após confirmação no modal
+    async function transferirConfirmado() {
+      const remetente = userEmail;
+      const destinatario = transferenciaTemp.destinatario;
+      const valor = transferenciaTemp.valor;
+
+      const remetenteRef = doc(db, "users", remetente);
+      const destinatarioRef = doc(db, "users", destinatario);
+
+      const remetenteSnap = await getDoc(remetenteRef);
+      if (!remetenteSnap.exists() || remetenteSnap.data().balance < valor) {
+        alert("Saldo insuficiente.");
+        fecharConfirmacaoTransferencia();
+        return;
+      }
+
+      await updateDoc(remetenteRef, { balance: increment(-valor) });
+      await setDoc(destinatarioRef, { balance: increment(valor) }, { merge: true });
+      await addDoc(collection(db, "transactions"), {
+        from: remetente,
+        to: destinatario,
+        amount: valor,
+        timestamp: serverTimestamp()
+      });
+
+      document.getElementById("valor").value = "";
+      document.getElementById("destinatario").value = "";
+      atualizarSaldo(remetente);
+      await carregarHistorico(remetente);
+
+      showToast("Transferência realizada com sucesso!");
+      fecharConfirmacaoTransferencia();
+    }
+
+    function fecharConfirmacaoTransferencia() {
+      document.getElementById("modalConfirmacaoTransferencia").classList.remove("active");
+      transferenciaTemp.destinatario = "";
+      transferenciaTemp.destinatarioNome = "";
+      transferenciaTemp.valor = 0;
+    }
+
+    async function carregarHistorico(email) {
+      const historicoRef = collection(db, "transactions");
+      const snapshot = await getDocs(historicoRef);
+
+      let historicos = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.from === email || data.to === email) {
+          historicos.push(data);
+        }
+      });
+
+      historicos.sort((a, b) => {
+        if (!a.timestamp || !b.timestamp) return 0;
+        return b.timestamp.seconds - a.timestamp.seconds;
+      });
+
+      historicoCache = historicos;
+    }
+
+    function abrirExtrato() {
+      const modal = document.getElementById("modalExtrato");
+      const lista = document.getElementById("listaExtrato");
+      lista.innerHTML = "";
+
+      historicoCache.slice(0, 12).forEach(data => {
+        const isEntrada = data.to === userEmail;
+        const outro = isEntrada ? data.from : data.to;
+        const sinal = isEntrada ? "+" : "-";
+        const dataFormatada = data.timestamp?.toDate().toLocaleString("pt-BR") || "";
+        const li = document.createElement("li");
+        li.textContent = `${sinal}${data.amount} maladins ${isEntrada ? "de" : "para"} ${outro} [${dataFormatada}]`;
+        li.className = isEntrada ? "entrada" : "saida";
+        lista.appendChild(li);
+      });
+
+      modal.classList.add("active");
+    }
+    function fecharExtrato() {
+      document.getElementById("modalExtrato").classList.remove("active");
+    }
+
+    async function aplicar(tipo) {
+      const email = userEmail;
+      const valor = parseInt(document.getElementById(tipo + "Valor").value);
+      if (isNaN(valor) || valor <= 0) return alert("Valor inválido.");
+
+      const userRef = doc(db, "users", email);
+      const snap = await getDoc(userRef);
+      if (!snap.exists() || snap.data().balance < valor) return alert("Saldo insuficiente.");
+
+      await updateDoc(userRef, { balance: increment(-valor) });
+
+      const hoje = new Date();
+      let vencimento = null;
+      if (tipo === "fixa") {
+        vencimento = new Date();
+        vencimento.setDate(hoje.getDate() + 15);
+      }
+
+      const docRef = await addDoc(collection(db, "investments"), {
+        owner: email,
+        type: tipo,
+        amount: valor,
+        startDate: hoje.toISOString(),
+        matureDate: vencimento ? vencimento.toISOString() : null,
+        redeemed: false
+      });
+
+      investimentosCache.push({
+        id: docRef.id,
+        owner: email,
+        type: tipo,
+        amount: valor,
+        startDate: hoje.toISOString(),
+        matureDate: vencimento ? vencimento.toISOString() : null,
+        redeemed: false
+      });
+
+      document.getElementById(tipo + "Valor").value = "";
+      atualizarSaldo(email);
+      await carregarInvestimentos(email);
+
+      showInvestimentoSucesso(tipo, valor);
+    }
+
+    async function carregarInvestimentos(email) {
+      const docs = await getDocs(collection(db, "investments"));
+      investimentosCache = [];
+      docs.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.owner === email && !data.redeemed) {
+          investimentosCache.push({ ...data, id: docSnap.id });
+        }
+      });
+    }
+
+    function abrirInvestimentos() {
+      const modal = document.getElementById("modalInvestimentos");
+      const lista = document.getElementById("listaInvestimentos");
+      lista.innerHTML = "";
+
+      if (investimentosCache.length === 0) {
+        lista.innerHTML = "<em>Você ainda não possui investimentos ativos.</em>";
+      } else {
+        investimentosCache.forEach(data => {
+          const tipo = data.type === "poupanca" ? "Poupança" : "Renda Fixa";
+          const vencimento = data.matureDate ? new Date(data.matureDate).toLocaleDateString() : "Sem vencimento";
+          const el = document.createElement("div");
+          el.innerHTML = `
+            <strong>${tipo}</strong> - ${data.amount} maladins<br>
+            Início: ${new Date(data.startDate).toLocaleDateString()} | Vencimento: ${vencimento}
+          `;
+
+          const btn = document.createElement("button");
+          btn.textContent = "Sacar";
+          btn.onclick = async () => {
+            await sacarInvestimento(data);
+          };
+
+          el.appendChild(btn);
+          lista.appendChild(el);
+        });
+      }
+      modal.classList.add("active");
+    }
+
+    async function sacarInvestimento(data) {
+      const agora = new Date();
+      let saldo = data.amount;
+
+      if (data.type === "poupanca") {
+        const inicio = new Date(data.startDate);
+        const dias = (agora - inicio) / (1000 * 60 * 60 * 24);
+        if (dias >= 30) saldo += Math.floor(data.amount * 0.05);
+        else alert("Saque antecipado: sem rendimento aplicado.");
+      } else if (data.type === "fixa") {
+        const vencimento = new Date(data.matureDate);
+        if (agora < vencimento) return alert("Investimento ainda não venceu. Aguarde até " + vencimento.toLocaleDateString());
+        saldo += Math.floor(data.amount * 0.10);
+      }
+
+      await updateDoc(doc(db, "users", userEmail), { balance: increment(saldo) });
+      await updateDoc(doc(db, "investments", data.id), { redeemed: true });
+      alert(`Você sacou ${saldo} maladins!`);
+      await carregarInvestimentos(userEmail);
+      fecharInvestimentos();
+      fecharTotalPoupanca();
+      fecharTotalFixa();
+      fecharTotalAllInvestimentos();
+      atualizarSaldo(userEmail);
+    }
+
+    function fecharInvestimentos() {
+      document.getElementById("modalInvestimentos").classList.remove("active");
+    }
+
+    async function abrirTopInvestidores() {
+      const modal = document.getElementById("modalTopInvestidores");
+      const lista = document.getElementById("listaTopInvestidores");
+      lista.innerHTML = "<div>Carregando...</div>";
+
+      const q = query(
+        collection(db, "investments"),
+        where("type", "==", "fixa"),
+        where("redeemed", "==", false)
+      );
+      const docs = await getDocs(q);
+
+      const mapa = {};
+      docs.forEach(docSnap => {
+        const data = docSnap.data();
+        if (!data.owner) return;
+        if (!mapa[data.owner]) mapa[data.owner] = 0;
+        mapa[data.owner] += parseInt(data.amount) || 0;
+      });
+
+      const ranking = Object.entries(mapa)
+        .map(([email, total]) => ({ email, total }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 12);
+
+      lista.innerHTML = "";
+
+      if (ranking.length === 0) {
+        lista.innerHTML = "<div>Nenhum investimento em renda fixa encontrado.</div>";
+      } else {
+        ranking.forEach((item, idx) => {
+          const div = document.createElement("div");
+          div.innerHTML = `<strong>${idx+1}.</strong> ${item.email} — <strong>${item.total}</strong> maladins`;
+          lista.appendChild(div);
+        });
+      }
+
+      modal.classList.add("active");
+    }
+    function fecharTopInvestidores() {
+      document.getElementById("modalTopInvestidores").classList.remove("active");
+    }
+
+    async function abrirTotalPoupanca() {
+      const modal = document.getElementById("modalTotalPoupanca");
+      const content = document.getElementById("modalTotalPoupancaContent");
+      let total = 0;
+
+      const q = query(
+        collection(db, "investments"),
+        where("type", "==", "poupanca"),
+        where("owner", "==", userEmail),
+        where("redeemed", "==", false)
+      );
+      const docs = await getDocs(q);
+
+      let lista = [];
+      docs.forEach(docSnap => {
+        const data = docSnap.data();
+        lista.push({ 
+          id: docSnap.id,
+          amount: parseInt(data.amount) || 0,
+          startDate: data.startDate,
+        });
+        total += parseInt(data.amount) || 0;
+      });
+
+      let html = `<h3>Investimentos em Poupança</h3>`;
+      if (lista.length === 0) {
+        html += `<div style="margin:12px 0;"><em>Você não possui investimentos ativos em poupança.</em></div>`;
+      } else {
+        html += `<div id="listaTotalPoupanca">`;
+        lista.forEach((inv, idx) => {
+          html += `
+            <div>
+              Valor: <b>${inv.amount}</b> maladins<br>
+              Início: ${new Date(inv.startDate).toLocaleDateString()}
+              <button style="margin-top:4px" onclick="sacarPoupanca('${inv.id}', ${inv.amount}, '${inv.startDate}')">Sacar</button>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+      html += `<div style="font-size: 20px; font-weight: bold; margin: 20px 0 10px 0;">Total: ${total} maladins</div>`;
+      html += `<button onclick="fecharTotalPoupanca()">Fechar</button>`;
+
+      content.innerHTML = html;
+      modal.classList.add("active");
+    }
+
+    window.sacarPoupanca = async function(id, amount, startDateStr) {
+      const agora = new Date();
+      const inicio = new Date(startDateStr);
+      let saldo = amount;
+      const dias = (agora - inicio) / (1000 * 60 * 60 * 24);
+      if (dias >= 30) saldo += Math.floor(amount * 0.05);
+      else alert("Saque antecipado: sem rendimento aplicado.");
+
+      await updateDoc(doc(db, "users", userEmail), { balance: increment(saldo) });
+      await updateDoc(doc(db, "investments", id), { redeemed: true });
+      alert(`Você sacou ${saldo} maladins!`);
+      await carregarInvestimentos(userEmail);
+      fecharTotalPoupanca();
+      fecharTotalAllInvestimentos();
+      atualizarSaldo(userEmail);
+    };
+
+    function fecharTotalPoupanca() {
+      document.getElementById("modalTotalPoupanca").classList.remove("active");
+    }
+
+    async function abrirTotalFixa() {
+      const modal = document.getElementById("modalTotalFixa");
+      const content = document.getElementById("modalTotalFixaContent");
+      let total = 0;
+
+      const q = query(
+        collection(db, "investments"),
+        where("type", "==", "fixa"),
+        where("owner", "==", userEmail),
+        where("redeemed", "==", false)
+      );
+      const docs = await getDocs(q);
+
+      let lista = [];
+      docs.forEach(docSnap => {
+        const data = docSnap.data();
+        lista.push({
+          id: docSnap.id,
+          amount: parseInt(data.amount) || 0,
+          startDate: data.startDate,
+          matureDate: data.matureDate
+        });
+        total += parseInt(data.amount) || 0;
+      });
+
+      let html = `<h3>Investimentos em Renda Fixa</h3>`;
+      if (lista.length === 0) {
+        html += `<div style="margin:12px 0;"><em>Você não possui investimentos ativos em renda fixa.</em></div>`;
+      } else {
+        html += `<div id="listaTotalFixa">`;
+        const agora = new Date();
+        lista.forEach((inv, idx) => {
+          const inicioStr = new Date(inv.startDate).toLocaleDateString();
+          const maturidadeStr = inv.matureDate ? new Date(inv.matureDate).toLocaleDateString() : "—";
+          const vencido = inv.matureDate && agora >= new Date(inv.matureDate);
+
+          html += `
+            <div>
+              Valor: <b>${inv.amount}</b> maladins<br>
+              Início: ${inicioStr} | Vencimento: ${maturidadeStr}
+              ${vencido ? `<button style="margin-top:4px" onclick="sacarFixa('${inv.id}', ${inv.amount}, '${inv.matureDate}')">Sacar</button>` : `<span style="color:#999;display:block;margin-top:4px;">Aguardando vencimento</span>`}
+            </div>
+          `;
+        });
+        html += `</div>`;
+      }
+      html += `<div style="font-size: 20px; font-weight: bold; margin: 20px 0 10px 0;">Total: ${total} maladins</div>`;
+      html += `<button onclick="fecharTotalFixa()">Fechar</button>`;
+
+      content.innerHTML = html;
+      modal.classList.add("active");
+    }
+
+    window.sacarFixa = async function(id, amount, matureDateStr) {
+      const agora = new Date();
+      const maturidade = new Date(matureDateStr);
+      if (agora < maturidade) {
+        alert("Investimento ainda não venceu. Aguarde até " + maturidade.toLocaleDateString());
+        return;
+      }
+      let saldo = amount + Math.floor(amount * 0.10);
+
+      await updateDoc(doc(db, "users", userEmail), { balance: increment(saldo) });
+      await updateDoc(doc(db, "investments", id), { redeemed: true });
+      alert(`Você sacou ${saldo} maladins!`);
+      await carregarInvestimentos(userEmail);
+      fecharTotalFixa();
+      fecharTotalAllInvestimentos();
+      atualizarSaldo(userEmail);
+    };
+
+    function fecharTotalFixa() {
+      document.getElementById("modalTotalFixa").classList.remove("active");
+    }
+
+    async function abrirTotalAllInvestimentos() {
+      const modal = document.getElementById("modalTotalAllInvestimentos");
+      const content = document.getElementById("modalTotalAllInvestimentosContent");
+
+      const q = query(
+        collection(db, "investments"),
+        where("owner", "==", userEmail),
+        where("redeemed", "==", false)
+      );
+      const docs = await getDocs(q);
+
+      let totalPoupanca = 0;
+      let totalFixa = 0;
+
+      docs.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data.type === "poupanca") totalPoupanca += parseInt(data.amount) || 0;
+        if (data.type === "fixa") totalFixa += parseInt(data.amount) || 0;
+      });
+
+      let html = `<h3>Total Investido</h3>`;
+      html += `<div style="margin:20px 0 10px 0;font-size:17px;"><b>Poupança:</b> ${totalPoupanca} maladins</div>`;
+      html += `<div style="margin:10px 0 10px 0;font-size:17px;"><b>Renda Fixa:</b> ${totalFixa} maladins</div>`;
+      html += `<div style="margin:20px 0 20px 0;font-size:22px;font-weight:bold;"><b>Total:</b> ${totalPoupanca + totalFixa} maladins</div>`;
+      html += `<button onclick="fecharTotalAllInvestimentos()">Fechar</button>`;
+
+      content.innerHTML = html;
+      modal.classList.add("active");
+    }
+    function fecharTotalAllInvestimentos() {
+      document.getElementById("modalTotalAllInvestimentos").classList.remove("active");
+    }
+
+    async function atualizarSaldo(email) {
+      const ref = doc(db, "users", email);
+      const snap = await getDoc(ref);
+      document.getElementById("saldoAtual").textContent = snap.exists() ? snap.data().balance : 0;
+    }
+
+    // MODAL SOBRE
+    window.abrirSobre = function() {
+      document.getElementById("modalSobre").classList.add("active");
+    };
+    window.fecharSobre = function() {
+      document.getElementById("modalSobre").classList.remove("active");
+    };
+
+    // MODAL CONFIRMAÇÃO TRANSFERÊNCIA
+    window.solicitarConfirmacaoTransferencia = solicitarConfirmacaoTransferencia;
+    window.transferirConfirmado = transferirConfirmado;
+    window.fecharConfirmacaoTransferencia = fecharConfirmacaoTransferencia;
+
+    // Links do menu, modais e eventos
+    window.loginComGoogle = loginComGoogle;
+    window.aplicar = aplicar;
+    window.abrirExtrato = abrirExtrato;
+    window.fecharExtrato = fecharExtrato;
+    window.abrirInvestimentos = abrirInvestimentos;
+    window.fecharInvestimentos = fecharInvestimentos;
+    window.abrirTopInvestidores = abrirTopInvestidores;
+    window.fecharTopInvestidores = fecharTopInvestidores;
+    window.abrirTotalPoupanca = abrirTotalPoupanca;
+    window.fecharTotalPoupanca = fecharTotalPoupanca;
+    window.abrirTotalFixa = abrirTotalFixa;
+    window.fecharTotalFixa = fecharTotalFixa;
+    window.abrirTotalAllInvestimentos = abrirTotalAllInvestimentos;
+    window.fecharTotalAllInvestimentos = fecharTotalAllInvestimentos;
+
+    window.sacarPoupanca = window.sacarPoupanca;
+    window.sacarFixa = window.sacarFixa;
+
+    window.addEventListener("click", function(e){
+      const modalExtrato = document.getElementById("modalExtrato");
+      if (modalExtrato.classList.contains("active") && e.target === modalExtrato) fecharExtrato();
+      const modalInvest = document.getElementById("modalInvestimentos");
+      if (modalInvest.classList.contains("active") && e.target === modalInvest) fecharInvestimentos();
+      const modalTop = document.getElementById("modalTopInvestidores");
+      if (modalTop && modalTop.classList.contains("active") && e.target === modalTop) fecharTopInvestidores();
+      const modalPoup = document.getElementById("modalTotalPoupanca");
+      if (modalPoup && modalPoup.classList.contains("active") && e.target === modalPoup) fecharTotalPoupanca();
+      const modalFixa = document.getElementById("modalTotalFixa");
+      if (modalFixa && modalFixa.classList.contains("active") && e.target === modalFixa) fecharTotalFixa();
+      const modalAll = document.getElementById("modalTotalAllInvestimentos");
+      if (modalAll && modalAll.classList.contains("active") && e.target === modalAll) fecharTotalAllInvestimentos();
+      const modalSobre = document.getElementById("modalSobre");
+      if (modalSobre && modalSobre.classList.contains("active") && e.target === modalSobre) fecharSobre();
+      const modalConfirma = document.getElementById("modalConfirmacaoTransferencia");
+      if (modalConfirma && modalConfirma.classList.contains("active") && e.target === modalConfirma) fecharConfirmacaoTransferencia();
+      const modalInvestimentoSucesso = document.getElementById("modalInvestimentoSucesso");
+      if (modalInvestimentoSucesso && modalInvestimentoSucesso.classList.contains("active") && e.target === modalInvestimentoSucesso)
+        fecharInvestimentoSucesso();
+    });
+  </script>
+</head>
+<body>
+  <header class="dashboard-header">
+    <div class="logo">Banco JOPA <span class="emoji" aria-label="Banco">🏦</span></div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="conquistas.html">Conquistas</a>
+      <a href="loja.html">Loja</a>
+      <a href="jogos.html">Jogos</a>
+      <button onclick="abrirTopInvestidores()" type="button">Top Investidores</button>
+      <button onclick="abrirSobre()" type="button">Sobre</button>
+    </nav>
+  </header>
+  <div id="loginArea" style="max-width:450px; margin:60px auto;">
+    <button onclick="loginComGoogle()" style="width:100%;padding:14px;font-size:17px;">Entrar com Google (@jopers.com.br)</button>
+  </div>
+  <div id="mainPanel" class="dashboard-container" style="display: none;">
+    <div class="coluna-esquerda">
+      <div class="card">
+        <div id="boasVindas" class="boas-vindas"></div>
+        <div class="user-info">
+          <strong>Usuário:</strong> <span id="userEmail"></span><br>
+          <span class="saldo">Saldo: <span id="saldoAtual">0</span> maladins</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Transferir maladins</h3>
+        <div class="destinatario-section">
+          <label for="destinatario">Destinatário</label>
+          <input type="text" id="destinatario" placeholder="Digite nome ou e-mail" oninput="filtrarUsuariosDropdown()" autocomplete="off" />
+          <div id="listaSugestoes"></div>
+        </div>
+        <label for="valor">Valor</label>
+        <input type="number" id="valor" placeholder="Valor a transferir" min="1" />
+        <button onclick="solicitarConfirmacaoTransferencia()">Transferir</button>
+        <button class="extrato-btn" onclick="abrirExtrato()">Extrato</button>
+      </div>
+    </div>
+    <div class="coluna-direita">
+      <div class="card">
+        <h3>
+          Investir em Poupança
+          <span class="help" tabindex="0" aria-label="Ajuda sobre Poupança">
+            (?)
+            <span class="tooltip">Poupança: invista maladins e, após 30 dias, receba 5% de rendimento. Saques antes dos 30 dias não geram rendimento.</span>
+          </span>
+        </h3>
+        <div class="painel-investimento">
+          <input type="number" id="poupancaValor" placeholder="Quantia" min="1" />
+          <button onclick="aplicar('poupanca')">Aplicar</button>
+          <button onclick="abrirTotalPoupanca()">Investimentos em Poupança</button>
+        </div>
+        <h3>
+          Investir em Renda Fixa
+          <span class="help" tabindex="0" aria-label="Ajuda sobre Renda Fixa">
+            (?)
+            <span class="tooltip">Renda Fixa: invista maladins e, após 15 dias, receba 10% de rendimento. Saques antes do vencimento não são permitidos.</span>
+          </span>
+        </h3>
+        <div class="painel-investimento">
+          <input type="number" id="fixaValor" placeholder="Quantia" min="1" />
+          <button onclick="aplicar('fixa')">Aplicar</button>
+          <button onclick="abrirTotalFixa()">Investimento Renda Fixa</button>
+        </div>
+        <button onclick="abrirTotalAllInvestimentos()">Total Investido</button>
+      </div>
+    </div>
+    <div id="modalInvestimentos">
+      <div id="modalInvestimentosContent">
+        <h3>Seus Investimentos Ativos</h3>
+        <div id="listaInvestimentos"></div>
+        <button onclick="fecharInvestimentos()">Fechar</button>
+      </div>
+    </div>
+    <div id="modalExtrato">
+      <div id="modalExtratoContent">
+        <h3>Extrato das Últimas 12 Transferências</h3>
+        <ul id="listaExtrato"></ul>
+        <button onclick="fecharExtrato()">Fechar</button>
+      </div>
+    </div>
+    <div id="modalTopInvestidores">
+      <div id="modalTopInvestidoresContent">
+        <h3>Top 12 Investidores — Renda Fixa</h3>
+        <div id="listaTopInvestidores"></div>
+        <button onclick="fecharTopInvestidores()">Fechar</button>
+      </div>
+    </div>
+    <div id="modalTotalPoupanca">
+      <div id="modalTotalPoupancaContent"></div>
+    </div>
+    <div id="modalTotalFixa">
+      <div id="modalTotalFixaContent"></div>
+    </div>
+    <div id="modalTotalAllInvestimentos">
+      <div id="modalTotalAllInvestimentosContent"></div>
+    </div>
+    <div id="modalSobre">
+      <div id="modalSobreContent">
+        <h2>Maladins - Educação Financeira</h2>
+        <p>Prof. Christian</p>
+        <button onclick="fecharSobre()">Fechar</button>
+      </div>
+    </div>
+    <div id="modalConfirmacaoTransferencia">
+      <div id="modalConfirmacaoTransferenciaContent">
+        <h3>Confirmar Transferência</h3>
+        <p>Você está prestes a transferir <strong><span id="confirmaValor"></span> maladins</strong><br>
+        para <strong><span id="confirmaDestinatario"></span></strong>.</p>
+        <p>Deseja confirmar?</p>
+        <button onclick="transferirConfirmado()">Confirmar</button>
+        <button onclick="fecharConfirmacaoTransferencia()">Cancelar</button>
+      </div>
+    </div>
+    <div id="modalInvestimentoSucesso">
+      <div id="modalInvestimentoSucessoContent"></div>
+    </div>
+    <div id="toast"></div>
+  </div>
+</body>
+</html>
