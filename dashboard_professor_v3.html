@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel do Professor - Maladins</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #005b96;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 15px;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 500px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .hidden { display: none; }
+    h2 { color: #005b96; }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #005b96;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #004472;
+    }
+    .saldo {
+      font-weight: bold;
+      font-size: 18px;
+      color: #005b96;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getAuth, signInWithPopup, GoogleAuthProvider, signOut
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+      getFirestore, doc, getDoc, setDoc, updateDoc, increment
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaES1733ncqRt_GLMkqtSOilijEtGZhks",
+      authDomain: "maladins-494d6.firebaseapp.com",
+      projectId: "maladins-494d6",
+      storageBucket: "maladins-494d6.appspot.com",
+      messagingSenderId: "734297372043",
+      appId: "1:734297372043:web:d08186d7a45ef356f02b8e",
+      measurementId: "G-8W6RLX3948"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    async function loginProfessor() {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        if (!user.email.endsWith("@timejopa.com.br")) {
+          alert("Apenas emails @timejopa.com.br são permitidos para professores.");
+          await signOut(auth);
+          return;
+        }
+
+        const userRef = doc(db, "users", user.email);
+        const docSnap = await getDoc(userRef);
+        if (!docSnap.exists()) {
+          await setDoc(userRef, { balance: 500 });
+        }
+
+        const updatedSnap = await getDoc(userRef);
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("painel").classList.remove("hidden");
+        document.getElementById("profEmail").textContent = user.email;
+        document.getElementById("profSaldo").textContent = updatedSnap.data().balance;
+
+      } catch (error) {
+        alert("Erro ao autenticar: " + error.message);
+        console.error(error);
+      }
+    }
+
+    async function transferirMaladins() {
+      const authUser = auth.currentUser;
+      const alunoEmail = document.getElementById("alunoEmail").value.trim();
+      const quantia = parseInt(document.getElementById("quantia").value);
+
+      if (!alunoEmail.endsWith("@jopers.com.br")) {
+        alert("Email do aluno deve terminar com @jopers.com.br");
+        return;
+      }
+      if (isNaN(quantia) || quantia <= 0) {
+        alert("Informe uma quantia válida.");
+        return;
+      }
+
+      const profRef = doc(db, "users", authUser.email);
+      const alunoRef = doc(db, "users", alunoEmail);
+
+      const profSnap = await getDoc(profRef);
+      if (!profSnap.exists()) {
+        alert("Professor não encontrado no banco de dados.");
+        return;
+      }
+      if (profSnap.data().balance < quantia) {
+        alert("Saldo insuficiente.");
+        return;
+      }
+
+      await updateDoc(profRef, { balance: increment(-quantia) });
+      await setDoc(alunoRef, { balance: increment(quantia) }, { merge: true });
+
+      const novoSaldo = (await getDoc(profRef)).data().balance;
+      document.getElementById("profSaldo").textContent = novoSaldo;
+
+      document.getElementById("alunoEmail").value = "";
+      document.getElementById("quantia").value = "";
+
+      alert(`Transferência de ${quantia} maladins para ${alunoEmail} realizada com sucesso.`);
+    }
+
+    window.loginProfessor = loginProfessor;
+    window.transferirMaladins = transferirMaladins;
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Maladins - Professor</h1>
+    <nav>
+      <a href="index.html">🏠 Home</a>
+      <a href="#">🎮 Jogos</a>
+      <a href="#">📘 Sobre</a>
+    </nav>
+  </header>
+
+  <div class="container" id="login">
+    <button onclick="loginProfessor()">Entrar com Google (@timejopa.com.br)</button>
+  </div>
+
+  <div class="container hidden" id="painel">
+    <p><strong>Email:</strong> <span id="profEmail"></span></p>
+    <p class="saldo"><strong>Saldo:</strong> <span id="profSaldo">0</span> maladins</p>
+
+    <h2>Transferir para Aluno</h2>
+    <label for="alunoEmail">Email do aluno (@jopers.com.br):</label>
+    <input type="email" id="alunoEmail">
+
+    <label for="quantia">Quantia a transferir:</label>
+    <input type="number" id="quantia" min="1">
+
+    <button onclick="transferirMaladins()">Transferir</button>
+    <button onclick="location.reload()">Sair</button>
+  </div>
+</body>
+</html>
