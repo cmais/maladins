@@ -420,6 +420,11 @@
         document.getElementById("userEmail").textContent = user.email;
         document.getElementById("saldoAtual").textContent = (docSnap.exists() ? docSnap.data().balance : 0);
 
+        // Mostrar link "Visão do Professor" apenas para usuários @timejopa.com.br
+        if (user.email.endsWith("@timejopa.com.br")) {
+          document.getElementById("linkVisaoProfessor").style.display = "inline";
+        }
+
         await carregarUsuarios();
         await carregarHistorico(user.email);
         await carregarInvestimentos(user.email);
@@ -1004,6 +1009,8 @@
       <a href="jogos.html">Jogos</a>
       <button onclick="abrirTopInvestidores()" type="button">Top Investidores</button>
       <button onclick="abrirSobre()" type="button">Sobre</button>
+      <!-- Botão para alternar para visão do professor - apenas para emails @timejopa.com.br -->
+      <a href="dashboard_professor_v3.html" id="linkVisaoProfessor" style="display: none;">Visão do Professor</a>
     </nav>
   </header>
   <div id="loginArea" style="max-width:450px; margin:60px auto;">
